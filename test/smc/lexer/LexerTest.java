@@ -149,9 +149,9 @@ public class LexerTest implements TokenCollector {
 
     @Test
     public void commentLines() {
-      assertLexResult("//comment 1\n-//comment2\n//comment2\n-//comment4;", "D,D");
+      assertLexResult("//comment 1\n-//comment2\n//comment3\n-//comment4;", "D,D");
     }
-  }
+   }
 
   @Nested
   public class MultipleTokenTests {

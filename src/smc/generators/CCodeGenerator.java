@@ -9,7 +9,7 @@ import java.nio.file.Files;
 import java.util.Map;
 
 public class CCodeGenerator extends CodeGenerator {
-  private CNestedSwitchCaseImplementer implementer;
+  private final CNestedSwitchCaseImplementer implementer;
 
   public CCodeGenerator(OptimizedStateMachine optimizedStateMachine,
                         String outputDirectory,
@@ -23,13 +23,18 @@ public class CCodeGenerator extends CodeGenerator {
   }
 
   public void writeFiles() throws IOException {
-    if (implementer.getErrors().size() > 0) {
+    if (!implementer.getErrors().isEmpty()) {
       for (CNestedSwitchCaseImplementer.Error error : implementer.getErrors())
         System.out.println("Implementation error: " + error.name());
     } else {
-      String fileName = optimizedStateMachine.header.fsm.toLowerCase();
+      String fileName = toLowerCamelCase(optimizedStateMachine.header.fsm);
       Files.write(getOutputPath(fileName + ".h"), implementer.getFsmHeader().getBytes());
       Files.write(getOutputPath(fileName + ".c"), implementer.getFsmImplementation().getBytes());
     }
+  }
+
+  static private String toLowerCamelCase(String s) {
+    if (s.length() < 2) return s.toLowerCase();
+    return s.substring(0, 1).toLowerCase() + s.substring(1);
   }
 }

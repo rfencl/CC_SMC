@@ -2,6 +2,7 @@
     <target name="clean">
         <delete dir="build"/>
         <delete dir="out"/>
+        <delete file="src/TwoCoinTurnstile.java"/>
     </target>
 
     <target name="smc">
@@ -20,6 +21,6 @@
     </target>
 
     <target name="run">
-        <java jar="build/jar/smc.jar" fork="true"/>
+        <java jar="../../build/jar/smc.jar" fork="true"/>
     </target>
 </project>

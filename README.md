@@ -2,12 +2,14 @@
 # SMC
 ## The State Machine Compiler
 
-SMC is a Java application that translates a state transition table into a program that implements the described state machine.  Output languages include Java, C, and C++.  Adding other languages is trivial.
+SMC is a Java application that translates a state transition table into a program that implements the described state machine.  Output languages include Java, Go, Dart, C, and C++.  Adding other languages is trivial.
 
 ### Command Line
+`ant compile && ant jar`
+
 `java -jar smc.jar -l <language> -o <directory> -f <flags>`
 
- * `<language>` is either `C`, `Cpp`, or `Java`.  
+ * `<language>` is one of: `C`, `Cpp`, `Dart`, `Go`, or `Java`.
  * `<directory>` is the output directory.  Your new state machine will be written there.
  * `<flags>` currently for Java only.  `package:package_name` will put the appropriate `package` statement in the generated code.
 
@@ -118,7 +120,7 @@ It is often more convenient to express the abstract _Action_ functions as an int
       ...
     }
 
-The programer will write the `TurnstileActions` interface to declare all the _Action_ functions.  SMC will generate code that implements that interface.   Here how this looks in UML:
+The programmer will write the `TurnstileActions` interface to declare all the _Action_ functions.  SMC will generate code that implements that interface.   Here how this looks in UML:
 
               +-------------------------+
               |      <<interface>>      |
@@ -197,7 +199,7 @@ We use the _dash_ (`-`) character for two purposes.  When used as an action it m
 When more than one action should be performed, they can be grouped together in braces (`{}`).
 
 ### Super States
-Notice the duplication of the `Reset` transition.  In all three states the `Reset` event does the same thing.  It transitions to the `Locked` state and it invokes the `lock` and `alarmOff` actions.  This duplication can be eliminated by using a _Super State_ as follows:
+Notice the duplication of the `Reset` transition.  In all three states the `Reset` event does the same thing.  It transitions to the `Locked` state, and it invokes the `lock` and `alarmOff` actions.  This duplication can be eliminated by using a _Super State_ as follows:
 
     Initial: Locked
     FSM: Turnstile
@@ -250,7 +252,7 @@ In the previous example, the fact that the alarm is turned on every time the `Al
       Alarming : Resetable <alarmOn >alarmOff   -    -    -
     }
 
-The _less-than_ (`<`) character denote an _entry-action_.  It is invoked whenever the state is entered.  Likewise the _greater-than_ (`>`) character denotes an _exit-action_ which is invoked whenever the state is exited.  
+The _less-than_ (`<`) character denote an _entry-action_.  It is invoked whenever the state is entered.  Likewise, the _greater-than_ (`>`) character denotes an _exit-action_ which is invoked whenever the state is exited.  
 
 In the above example, notice that nearly all the actions have been restated as _entry-_ and _exit-actions_.  You may find that this makes the state machine more readable.  
 

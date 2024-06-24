@@ -3,22 +3,22 @@ package smc.semanticAnalyzer;
 import java.util.*;
 
 public class SemanticStateMachine {
-  public List<AnalysisError> errors = new ArrayList<>();
-  public List<AnalysisError> warnings = new ArrayList<>();
-  public SortedMap<String, SemanticState> states = new TreeMap<>();
-  public Set<String> events = new HashSet<>();
-  public Set<String> actions = new HashSet<>();
+  public final List<AnalysisError> errors = new ArrayList<>();
+  public final List<AnalysisError> warnings = new ArrayList<>();
+  public final SortedMap<String, SemanticState> states = new TreeMap<>();
+  public final Set<String> events = new HashSet<>();
+  public final Set<String> actions = new HashSet<>();
   public SemanticState initialState;
   public String actionClass;
   public String fsmName;
 
   public String toString() {
     return String.format(
-      "" +
-        "Actions: %s\n" +
-        "FSM: %s\n" +
-        "Initial: %s" +
-        "%s",
+            """
+                    Actions: %s
+                    FSM: %s
+                    Initial: %s\
+                    %s""",
       actionClass, fsmName, initialState.name, statesToString());
 
   }
@@ -36,21 +36,20 @@ public class SemanticStateMachine {
   }
 
   public static class SemanticState implements Comparable<SemanticState> {
-    public String name;
-    public List<String> entryActions = new ArrayList<>();
-    public List<String> exitActions = new ArrayList<>();
+    public final String name;
+    public final List<String> entryActions = new ArrayList<>();
+    public final List<String> exitActions = new ArrayList<>();
     public boolean abstractState = false;
-    public SortedSet<SemanticState> superStates = new TreeSet<>();
-    public List<SemanticTransition> transitions = new ArrayList<>();
+    public final SortedSet<SemanticState> superStates = new TreeSet<>();
+    public final List<SemanticTransition> transitions = new ArrayList<>();
 
     public SemanticState(String name) {
       this.name = name;
     }
 
     public boolean equals(Object obj) {
-      if (obj instanceof SemanticState) {
-        SemanticState other = (SemanticState) obj;
-        return
+      if (obj instanceof SemanticState other) {
+          return
           Objects.equals(other.name, name) &&
             Objects.equals(other.entryActions, entryActions) &&
             Objects.equals(other.exitActions, exitActions) &&
@@ -127,7 +126,7 @@ public class SemanticStateMachine {
       CONFLICTING_SUPERSTATES,
     }
 
-    private ID id;
+    private final ID id;
     private Object extra;
 
     public AnalysisError(ID id) {
@@ -148,9 +147,8 @@ public class SemanticStateMachine {
     }
 
     public boolean equals(Object obj) {
-      if (obj instanceof AnalysisError) {
-        AnalysisError other = (AnalysisError) obj;
-        return id == other.id && Objects.equals(extra, other.extra);
+      if (obj instanceof AnalysisError other) {
+          return id == other.id && Objects.equals(extra, other.extra);
       }
       return false;
     }
@@ -159,6 +157,6 @@ public class SemanticStateMachine {
   public static class SemanticTransition {
     public String event;
     public SemanticState nextState;
-    public List<String> actions = new ArrayList<>();
+    public final List<String> actions = new ArrayList<>();
   }
 }

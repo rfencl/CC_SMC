@@ -1,11 +1,14 @@
 package com.cleancoder.args;
 
-import org.junit.Test;
-
 import java.util.Map;
 
 import static com.cleancoder.args.ArgsException.ErrorCode.*;
-import static org.junit.Assert.*;
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class ArgsTest {
 
@@ -17,7 +20,7 @@ public class ArgsTest {
 
 
   @Test
-  public void testWithNoSchemaButWithOneArgument() throws Exception {
+  public void testWithNoSchemaButWithOneArgument() {
     try {
       new Args("", new String[]{"-x"});
       fail();
@@ -28,7 +31,7 @@ public class ArgsTest {
   }
 
   @Test
-  public void testWithNoSchemaButWithMultipleArguments() throws Exception {
+  public void testWithNoSchemaButWithMultipleArguments() {
     try {
       new Args("", new String[]{"-x", "-y"});
       fail();
@@ -40,7 +43,7 @@ public class ArgsTest {
   }
 
   @Test
-  public void testNonLetterSchema() throws Exception {
+  public void testNonLetterSchema() {
     try {
       new Args("*", new String[]{});
       fail("Args constructor should have thrown exception");
@@ -51,7 +54,7 @@ public class ArgsTest {
   }
 
   @Test
-  public void testInvalidArgumentFormat() throws Exception {
+  public void testInvalidArgumentFormat() {
     try {
       new Args("f~", new String[]{});
       fail("Args constructor should have throws exception");
@@ -64,7 +67,7 @@ public class ArgsTest {
   @Test
   public void testSimpleBooleanPresent() throws Exception {
     Args args = new Args("x", new String[]{"-x"});
-    assertEquals(true, args.getBoolean('x'));
+      assertTrue(args.getBoolean('x'));
     assertEquals(1, args.nextArgument());
   }
 
@@ -77,7 +80,7 @@ public class ArgsTest {
   }
 
   @Test
-  public void testMissingStringArgument() throws Exception {
+  public void testMissingStringArgument() {
     try {
       new Args("x*", new String[]{"-x"});
       fail();
@@ -104,7 +107,7 @@ public class ArgsTest {
   }
 
   @Test
-  public void testInvalidInteger() throws Exception {
+  public void testInvalidInteger() {
     try {
       new Args("x#", new String[]{"-x", "Forty two"});
       fail();
@@ -117,7 +120,7 @@ public class ArgsTest {
   }
 
   @Test
-  public void testMissingInteger() throws Exception {
+  public void testMissingInteger() {
     try {
       new Args("x#", new String[]{"-x"});
       fail();
@@ -135,7 +138,7 @@ public class ArgsTest {
   }
 
   @Test
-  public void testInvalidDouble() throws Exception {
+  public void testInvalidDouble() {
     try {
       new Args("x##", new String[]{"-x", "Forty two"});
       fail();
@@ -147,7 +150,7 @@ public class ArgsTest {
   }
 
   @Test
-  public void testMissingDouble() throws Exception {
+  public void testMissingDouble() {
     try {
       new Args("x##", new String[]{"-x"});
       fail();
@@ -167,7 +170,7 @@ public class ArgsTest {
   }
 
   @Test
-  public void testMissingStringArrayElement() throws Exception {
+  public void testMissingStringArrayElement() {
     try {
       new Args("x[*]", new String[] {"-x"});
       fail();
@@ -197,9 +200,10 @@ public class ArgsTest {
     assertEquals("val2", map.get("key2"));
   }
 
-  @Test(expected=ArgsException.class)
-  public void malFormedMapArgument() throws Exception {
-    Args args = new Args("f&", new String[] {"-f", "key1:val1,key2"});
+  @Test
+  public void malFormedMapArgument() {
+    assertThrows(ArgsException.class, () -> 
+    new Args("f&", new String[] {"-f", "key1:val1,key2"}));
   }
 
   @Test

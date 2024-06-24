@@ -1,14 +1,15 @@
-import org.junit.Before;
-import org.junit.Test;
-
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.core.Is.is;
 
 public class TwoCoinTurnstileTest {
   private String output = "";
   private TwoCoinTurnstile sm;
 
-  class TwoCoinTurnstileImp extends TwoCoinTurnstile {
+  @Nested
+  class TwoCoinTurnstileImp  extends TwoCoinTurnstile {
     public void unhandledTransition(String state, String event) {
       output += String.format("X(%s,%s) ", state, event);
     }
@@ -34,14 +35,14 @@ public class TwoCoinTurnstileTest {
     }
   }
 
-  @Before
+  @BeforeEach
   public void setup() {
     output = "";
     sm = new TwoCoinTurnstileImp();
   }
 
   @Test
-  public void normal() throws Exception {
+  public void normal() {
     sm.Coin();
     sm.Coin();
     sm.Pass();
@@ -49,21 +50,21 @@ public class TwoCoinTurnstileTest {
   }
 
   @Test
-  public void oneCoinAttempt() throws Exception {
+  public void oneCoinAttempt() {
     sm.Coin();
     sm.Pass();
     assertThat(output, is("A"));
   }
 
   @Test
-  public void alarmReset() throws Exception {
+  public void alarmReset() {
     sm.Pass();
     sm.Reset();
     assertThat(output, is("AOL"));
   }
 
   @Test
-  public void extraCoins() throws Exception {
+  public void extraCoins() {
     sm.Coin();
     sm.Coin();
     sm.Coin();
@@ -73,8 +74,9 @@ public class TwoCoinTurnstileTest {
   }
 
   @Test
-  public void pass() throws Exception {
-    
+  public void pass() {
+    sm.Pass();
+    assertThat(output, is("A"));
   }
 
 

@@ -1,36 +1,37 @@
 package smc.generators.nestedSwitchCaseGenerator;
 
-import de.bechte.junit.runners.context.HierarchicalContextRunner;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+
+
 import smc.OptimizedStateMachine;
 import smc.lexer.Lexer;
 import smc.optimizer.Optimizer;
 import smc.parser.Parser;
 import smc.parser.SyntaxBuilder;
-import smc.semanticAnalyzer.SemanticStateMachine;
 import smc.semanticAnalyzer.SemanticAnalyzer;
+import smc.semanticAnalyzer.SemanticStateMachine;
 
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
-import static org.junit.Assert.assertThat;
+
 import static smc.generators.nestedSwitchCaseGenerator.NSCNode.*;
 import static smc.parser.ParserEvent.EOF;
 
-@RunWith(HierarchicalContextRunner.class)
+
 public class NSCGeneratorTest {
   private Lexer lexer;
   private Parser parser;
   private SyntaxBuilder builder;
   private SemanticAnalyzer analyzer;
   private Optimizer optimizer;
-  private String stdHead = "Initial: I FSM:f Actions:acts";
   private NSCGenerator generator;
   private NSCNodeVisitor implementer;
   private String output = "";
 
-  @Before
-  public void setUp() throws Exception {
+  @BeforeEach
+  public void setUp() {
     builder = new SyntaxBuilder();
     parser = new Parser(builder);
     lexer = new Lexer(parser);
@@ -51,7 +52,8 @@ public class NSCGeneratorTest {
   }
 
   private void assertGenerated(String stt, String switchCase) {
-    OptimizedStateMachine sm = headerAndSttToSm(stdHead, stt);
+      String stdHead = "Initial: I FSM:f Actions:acts";
+      OptimizedStateMachine sm = headerAndSttToSm(stdHead, stt);
     generator.generate(sm).accept(implementer);
     assertThat(output, equalTo(switchCase));
   }
@@ -103,47 +105,46 @@ public class NSCGeneratorTest {
     }
   }
 
+  @Nested
   public class SwitchCaseTests {
-    @Before
+    @BeforeEach
     public void setup() {
       implementer = new TestVisitor();
     }
 
     @Test
-    public void OneTransition() throws Exception {
+    public void OneTransition() {
       assertGenerated(
         "{I e I a}",
         "s state {case I {s event {case e {setState(State.I) a() } default(I);}}}");
     }
 
     @Test
-    public void twoTransitions() throws Exception {
+    public void twoTransitions() {
       assertGenerated("{I e1 S a1 S e2 I a2}",
-        "" +
-          "s state {" +
+        "s state {" +
           "case I {s event {case e1 {setState(State.S) a1() } default(I);}}" +
           "case S {s event {case e2 {setState(State.I) a2() } default(S);}}" +
           "}");
     }
 
     @Test
-    public void twoStatesTwoEventsFourActions() throws Exception {
+    public void twoStatesTwoEventsFourActions() {
       assertGenerated(
-        "" +
-          "{" +
+        "{" +
           "  I e1 S a1 " +
           "  I e2 - a2" +
           "  S e1 I a3" +
           "  S e2 - a4" +
           "}",
-        "" +
-          "s state {" +
+        "s state {" +
           "case I {s event {case e1 {setState(State.S) a1() }" +
           "case e2 {setState(State.I) a2() } default(I);}}" +
           "case S {s event {case e1 {setState(State.I) a3() }" +
           "case e2 {setState(State.S) a4() } default(S);}}}");
     }
   } // SwitchCase Tests.
+
 
   private class TestVisitor extends EmptyVisitor {
     public void visit(SwitchCaseNode switchCaseNode) {
@@ -167,17 +168,17 @@ public class NSCGeneratorTest {
     }
   }
 
+  @Nested
   public class EnumTests {
-    @Before
+    @BeforeEach
     public void setup() {
       implementer = new EnumVisitor();
     }
 
     @Test
-    public void statesAndEvents() throws Exception {
+    public void statesAndEvents() {
       assertGenerated(
-        "" +
-          "{" +
+        "{" +
           "  I e1 S a1 " +
           "  I e2 - a2" +
           "  S e1 I a3" +
@@ -193,14 +194,15 @@ public class NSCGeneratorTest {
     }
   }
 
+  @Nested
   public class StatePropertyTest {
-    @Before
+    @BeforeEach
     public void setup() {
       implementer = new StatePropertyVisitor();
     }
 
     @Test
-    public void statePropertyIsCreated() throws Exception {
+    public void statePropertyIsCreated() {
       assertGenerated("{I e I a}", "state property = I");
     }
 
@@ -213,17 +215,17 @@ public class NSCGeneratorTest {
     }
   }
 
+  @Nested
   public class EventDelegators {
-    @Before
+    @BeforeEach
     public void setup() {
       implementer = new EventDelegatorVisitor();
     }
 
     @Test
-    public void eventDelegatorsAreGenerated() throws Exception {
+    public void eventDelegatorsAreGenerated() {
       assertGenerated(
-              "" +
-                "{" +
+              "{" +
                 "  I e1 S a1 " +
                 "  I e2 - a2" +
                 "  S e1 I a3" +
@@ -240,14 +242,15 @@ public class NSCGeneratorTest {
     }
   }
 
+  @Nested
   public class HandleEventTest {
-    @Before
+    @BeforeEach
     public void setup() {
       implementer = new HandleEventVisitor();
     }
 
     @Test
-    public void handleEventIsGenerated() throws Exception {
+    public void handleEventIsGenerated() {
       assertGenerated("{I e I a}", "he(s)");
     }
 
@@ -266,14 +269,15 @@ public class NSCGeneratorTest {
     }
   }
 
+  @Nested
   public class FsmClassTest {
-    @Before
+    @BeforeEach
     public void setup() {
       implementer = new FSMClassVisitor();
     }
 
     @Test
-    public void fsmClassNodeIsGenerated() throws Exception {
+    public void fsmClassNodeIsGenerated() {
       assertGenerated("{I e I a}", "class f:acts {d e e p he sc}");
     }
 

@@ -1,7 +1,8 @@
 package smc.implementers;
 
-import org.junit.Before;
-import org.junit.Test;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import smc.OptimizedStateMachine;
 import smc.generators.nestedSwitchCaseGenerator.NSCGenerator;
 import smc.generators.nestedSwitchCaseGenerator.NSCNode;
@@ -9,14 +10,14 @@ import smc.lexer.Lexer;
 import smc.optimizer.Optimizer;
 import smc.parser.Parser;
 import smc.parser.SyntaxBuilder;
-import smc.semanticAnalyzer.SemanticStateMachine;
 import smc.semanticAnalyzer.SemanticAnalyzer;
+import smc.semanticAnalyzer.SemanticStateMachine;
 
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.assertThat;
 import static smc.Utilities.compressWhiteSpace;
 import static smc.parser.ParserEvent.EOF;
 
@@ -27,10 +28,10 @@ public class JavaNestedSwitchCaseImplementerTest {
   private SemanticAnalyzer analyzer;
   private Optimizer optimizer;
   private NSCGenerator generator;
-  private Map<String, String> emptyFlags = new HashMap<>();
+  private final Map<String, String> emptyFlags = new HashMap<>();
 
-  @Before
-  public void setUp() throws Exception {
+  @BeforeEach
+  public void setUp() {
     builder = new SyntaxBuilder();
     parser = new Parser(builder);
     lexer = new Lexer(parser);
@@ -47,43 +48,43 @@ public class JavaNestedSwitchCaseImplementerTest {
   }
 
   @Test
-  public void oneTransitionWithPackageAndActions() throws Exception {
+  public void oneTransitionWithPackageAndActions() {
     Map<String, String> flags = new HashMap<>();
     flags.put("package", "thePackage");
     JavaNestedSwitchCaseImplementer implementer = new JavaNestedSwitchCaseImplementer(flags);
-    OptimizedStateMachine sm = produceStateMachine("" +
-        "Initial: I\n" +
-        "Fsm: fsm\n" +
-        "Actions: acts\n" +
-        "{" +
-        "  I E I A" +
-        "}");
+    OptimizedStateMachine sm = produceStateMachine("""
+            Initial: I
+            Fsm: fsm
+            Actions: acts
+            {\
+              I E I A\
+            }""");
     NSCNode generatedFsm = generator.generate(sm);
     generatedFsm.accept(implementer);
-    assertWhitespaceEquivalent(implementer.getOutput(), "" +
-      "package thePackage;\n" +
-      "public abstract class fsm implements acts {\n" +
-      "public abstract void unhandledTransition(String state, String event);\n" +
-      "  private enum State {I}\n" +
-      "  private enum Event {E}\n" +
-      "  private State state = State.I;\n" +
-      "" +
-      "  private void setState(State s) {state = s;}\n" +
-      "  public void E() {handleEvent(Event.E);}\n" +
-      "  private void handleEvent(Event event) {\n" +
-      "    switch(state) {\n" +
-      "      case I:\n" +
-      "        switch(event) {\n" +
-      "          case E:\n" +
-      "            setState(State.I);\n" +
-      "            A();\n" +
-      "            break;\n" +
-      "          default: unhandledTransition(state.name(), event.name()); break;\n" +
-      "        }\n" +
-      "        break;\n" +
-      "    }\n" +
-      "  }\n" +
-      "}\n");
+    assertWhitespaceEquivalent(implementer.getOutput(), """
+            package thePackage;
+            public abstract class fsm implements acts {
+            public abstract void unhandledTransition(String state, String event);
+              private enum State {I}
+              private enum Event {E}
+              private State state = State.I;
+              private void setState(State s) {state = s;}
+              public void E() {handleEvent(Event.E);}
+              private void handleEvent(Event event) {
+                switch(state) {
+                  case I:
+                    switch(event) {
+                      case E:
+                        setState(State.I);
+                        A();
+                        break;
+                      default: unhandledTransition(state.name(), event.name()); break;
+                    }
+                    break;
+                }
+              }
+            }
+            """);
   }
 
   private void assertWhitespaceEquivalent(String generated, String expected) {
@@ -91,35 +92,33 @@ public class JavaNestedSwitchCaseImplementerTest {
   }
 
   @Test
-  public void oneTransitionWithActionsButNoPackage() throws Exception {
+  public void oneTransitionWithActionsButNoPackage() {
     JavaNestedSwitchCaseImplementer implementer = new JavaNestedSwitchCaseImplementer(emptyFlags);
-    OptimizedStateMachine sm = produceStateMachine("" +
-        "Initial: I\n" +
-        "Fsm: fsm\n" +
-        "Actions: acts\n" +
-        "{" +
-        "  I E I A" +
-        "}");
+    OptimizedStateMachine sm = produceStateMachine("""
+            Initial: I
+            Fsm: fsm
+            Actions: acts
+            {\
+              I E I A\
+            }""");
     NSCNode generatedFsm = generator.generate(sm);
     generatedFsm.accept(implementer);
-    assertThat(implementer.getOutput(), startsWith("" +
-      "public abstract class fsm implements acts {\n"));
+    assertThat(implementer.getOutput(), startsWith("public abstract class fsm implements acts {\n"));
   }
 
   @Test
-  public void oneTransitionWithNoActionsAndNoPackage() throws Exception {
+  public void oneTransitionWithNoActionsAndNoPackage() {
     JavaNestedSwitchCaseImplementer implementer = new JavaNestedSwitchCaseImplementer(emptyFlags);
-    OptimizedStateMachine sm = produceStateMachine("" +
-        "Initial: I\n" +
-        "Fsm: fsm\n" +
-        "{" +
-        "  I E I A" +
-        "}");
+    OptimizedStateMachine sm = produceStateMachine("""
+            Initial: I
+            Fsm: fsm
+            {\
+              I E I A\
+            }""");
     NSCNode generatedFsm = generator.generate(sm);
     generatedFsm.accept(implementer);
     String output = implementer.getOutput();
-    assertThat(output, startsWith("" +
-      "public abstract class fsm {\n"));
+    assertThat(output, startsWith("public abstract class fsm {\n"));
     assertThat(output, containsString("protected abstract void A();\n"));
   }
 
